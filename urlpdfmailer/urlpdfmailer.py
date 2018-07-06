@@ -4,7 +4,7 @@ import pdfkit
 
 class UrlPdfMailer:
     def __init__(self, login_url, login_form_id, username_field_id='username', password_field_id='password'):
-        self.session = RoboBrowser()
+        self.session = RoboBrowser(parser='html.parser')
         self.login_url = login_url
         self.login_form_id = login_form_id
         self.username_field_id = username_field_id
@@ -26,13 +26,11 @@ class UrlPdfMailer:
 
     def export_pdf(self, url, output_file):
         self.session.open(url)
-        pdfkit.from_string(str(self.session.parsed), output_file)
+        pdfkit.from_string(str(self.session.parsed), output_file, options={'quiet':''})
 
     def export_all(self):
         for output_file, url in self.pages_to_export.items():
             self.export_pdf(url, "{}.pdf".format(output_file))
 
-    def run(self):
-        self.export_all()
+    def update_mailer_attachments(self):
         self.mailer.add_attachments(["{}.pdf".format(i) for i in self.output_files])
-        self.mailer.send_message()
