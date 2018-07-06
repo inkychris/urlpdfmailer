@@ -24,12 +24,11 @@ def from_yaml_block(yaml_block):
     settings = yaml.safe_load(yaml_block)
 
     for site in settings["sites"]:
-        upm_instance = UrlPdfMailer(site["login_url"], site["login_form_id"],
+        upm_instance = UrlPdfMailer(site["login_url"], site["login_form_id"], verify=site.get("verify", True),
                                     username_field_id=site["username_field_id"],
                                     password_field_id=site["password_field_id"])
 
         upm_instance.login(site["username"], site["password"])
-        upm_instance.verify = site.get("verify", True)
         upm_instance.pages_to_export = site["pages_to_export"]
 
         upm_instance.mailer = Mailer(
@@ -53,7 +52,8 @@ def email_pdfs():
 
     for instance in instances:
         instance.export_all()
-        instance.mailer.send_message()
+        instance.update_mailer_attachments()
+        #instance.mailer.send_message()
 
 def recurring_job():
     email_pdfs()

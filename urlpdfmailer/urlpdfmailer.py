@@ -3,14 +3,15 @@ import pdfkit
 
 
 class UrlPdfMailer:
-    def __init__(self, login_url, login_form_id, username_field_id='username', password_field_id='password'):
+    def __init__(self, login_url, login_form_id, username_field_id='username', password_field_id='password',
+                 verify=True):
         self.session = RoboBrowser(parser='html.parser')
         self.login_url = login_url
         self.login_form_id = login_form_id
         self.username_field_id = username_field_id
         self.password_field_id = password_field_id
         self.pages_to_export = {}
-        self.verify = False
+        self.verify = verify
         self.mailer = None
 
     @property
