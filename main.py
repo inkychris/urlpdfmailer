@@ -88,8 +88,7 @@ def email_pdfs():
 
         logger.info("Sending message")
         try:
-            pass
-            #instance.mailer.send_message()
+            instance.mailer.send_message()
         except Exception:
             logger.exception("Failed to send email")
             return
