@@ -18,7 +18,7 @@ COPY requirements.txt ./
 RUN pip3 install --no-cache-dir -r requirements.txt
 
 COPY urlpdfmailer ./urlpdfmailer
-COPY main.py ./
+COPY main.py logging_config.yml ./
 
 COPY settings.yml ./
 

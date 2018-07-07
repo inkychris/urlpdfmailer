@@ -3,9 +3,28 @@ services:
   urlpdfmailer:
     build:
       context: ./
-      dockerfile: python.dockerfile
-    restart: always
+      dockerfile: urlpdfmailer.dockerfile
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 30s
+        max_attempts: 3
+        window: 120s
     volumes:
       - urlpdfmailer_logs:/usr/src/urlpdfmailer/log
+  logserver:
+    build:
+      context: ./
+      dockerfile: httptextfileserver.dockerfile
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 30s
+        max_attempts: 3
+        window: 120s
+    volumes:
+      - urlpdfmailer_logs:/usr/src/log
+    ports:
+     - 1234:1234
 volumes:
   urlpdfmailer_logs:
