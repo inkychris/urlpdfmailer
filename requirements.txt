@@ -1,4 +1,4 @@
 robobrowser
-pdfkit
+weasyprint
 pyyaml
 schedule

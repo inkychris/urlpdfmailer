@@ -1,5 +1,10 @@
-import yaml, argparse, schedule, time
+import yaml, argparse, schedule, time, logging.config, os
 from urlpdfmailer import UrlPdfMailer, Mailer
+
+os.makedirs('log', exist_ok=True)
+logging.basicConfig(filename='log/output.log', level=logging.DEBUG,
+                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
 def valid_time(string):
     if ':' not in string:
@@ -47,24 +52,52 @@ def from_yaml_block(yaml_block):
     return instances
 
 def email_pdfs():
-    with open(args.config_file, "r") as content:
-        instances = from_yaml_block(content)
+    logger.info("Loading config file")
+    try:
+        with open(args.config_file, "r") as content:
+            logger.info("Parsing contents of config file")
+            instances = from_yaml_block(content)
+    except Exception:
+        logger.exception("Failed to load config file")
+        return
 
+    logger.info("Processing instances in config file")
     for instance in instances:
-        instance.export_all()
-        instance.update_mailer_attachments()
-        #instance.mailer.send_message()
+        logger.info("Exporting pdfs from instance")
+        try:
+            instance.export_all()
+        except Exception:
+            logger.exception("Failed to export pages as pdfs")
+            return
+
+        logger.info("Adding exported pdfs to email message")
+        try:
+            instance.update_mailer_attachments()
+        except Exception:
+            logger.exception("Failed to add pdfs as attachments to message")
+            return
+
+        logger.info("Sending message")
+        try:
+            pass
+            #instance.mailer.send_message()
+        except Exception:
+            logger.exception("Failed to send email")
+            return
+        logger.info("Task completed successfully!")
 
 def recurring_job():
+    logger.info("Starting scheduled task")
     email_pdfs()
-    print("Next run scheduled:", schedule.next_run())
+    logger.info("Next run scheduled: {}".format(schedule.next_run()))
 
 if not args.weekday:
+    logger.info("Starting one off task")
     email_pdfs()
     exit(0)
 
 schedule.every().__getattribute__(args.weekday).at(args.time).do(recurring_job)
-print("First run scheduled:", schedule.next_run())
+logger.info("First run scheduled: {}".format(schedule.next_run()))
 while True:
     schedule.run_pending()
     time.sleep(1)

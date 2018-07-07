@@ -1,4 +1,4 @@
-import smtplib
+import smtplib, logging
 import os.path
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -24,6 +24,7 @@ class Mailer:
         self.password = password
         self.subject = ""
         self.body = ""
+        self.logger = logging.getLogger(__name__)
 
     @property
     def to_recipients(self):
@@ -56,10 +57,15 @@ class Mailer:
     def add_attachments(self, files):
         for file in files:
             attachment = MIMEBase('application', 'octet-stream')
+            self.logger.debug("Opening output file '{}' to attach to message".format(file))
             with open(file, 'rb') as content:
+                self.logger.debug("Setting attachment payload to attachment")
                 attachment.set_payload(content.read())
+                self.logger.debug("Encoding attachment")
                 encoders.encode_base64(attachment)
+                self.logger.debug("Added attachment header")
                 attachment.add_header('Content-Disposition', 'attachment; filename={}'.format(os.path.basename(file)))
+                self.logger.debug("Adding attachment to message")
                 self._message.attach(attachment)
 
     def clear_message(self):
@@ -71,11 +77,15 @@ class Mailer:
         self._message = MIMEMultipart()
 
     def send_message(self):
+        self.logger.debug("Added message headers")
         self._message['To'] = ','.join(self.to_recipients)
         self._message['CC'] = ','.join(self.cc_recipients)
         self._message['Subject'] = self.subject
         self._message.attach(MIMEText(self.body))
 
+        self.logger.debug("Connecting to SMTP server with SSL: {}:{}".format(self.host, self.port))
         with smtplib.SMTP_SSL(self.host, self.port) as server:
+            self.logger.debug("Logging in to SMTP server")
             server.login(self.sender, self.password)
+            self.logger.debug("Sending message from SMTP server")
             server.sendmail(self.sender, self.all_recipients, self._message.as_string())
