@@ -18,6 +18,8 @@ COPY requirements.txt ./
 RUN pip3 install --no-cache-dir -r requirements.txt
 
 COPY urlpdfmailer ./urlpdfmailer
-COPY main.py settings.yml ./
+COPY main.py ./
+
+COPY settings.yml ./
 
 ENTRYPOINT ["python3", "main.py", "settings.yml"]
