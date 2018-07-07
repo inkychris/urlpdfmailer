@@ -1,6 +1,15 @@
 import yaml, argparse, schedule, time, logging.config, os
 from urlpdfmailer import UrlPdfMailer, Mailer
 
+# Monkey-patching logging to scheduler
+def schedule_logging_decorator(function):
+    def logged_call(self):
+        function(self)
+        schedule.logger.info('Scheduled job %s', self)
+    return logged_call
+
+schedule.Job._schedule_next_run = schedule_logging_decorator(schedule.Job._schedule_next_run)
+
 os.makedirs('log', exist_ok=True)
 logging.basicConfig(filename='log/output.log', level=logging.DEBUG,
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -89,7 +98,6 @@ def email_pdfs():
 def recurring_job():
     logger.info("Starting scheduled task")
     email_pdfs()
-    logger.info("Next run scheduled: {}".format(schedule.next_run()))
 
 if not args.weekday:
     logger.info("Starting one off task")
@@ -97,7 +105,6 @@ if not args.weekday:
     exit(0)
 
 schedule.every().__getattribute__(args.weekday).at(args.time).do(recurring_job)
-logger.info("First run scheduled: {}".format(schedule.next_run()))
 while True:
     schedule.run_pending()
     time.sleep(1)
