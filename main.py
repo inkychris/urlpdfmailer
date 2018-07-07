@@ -10,11 +10,6 @@ def schedule_logging_decorator(function):
 
 schedule.Job._schedule_next_run = schedule_logging_decorator(schedule.Job._schedule_next_run)
 
-os.makedirs('log', exist_ok=True)
-logging.basicConfig(filename='log/output.log', level=logging.DEBUG,
-                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-logger = logging.getLogger(__name__)
-
 def valid_time(string):
     if ':' not in string:
         raise AttributeError('Time format requires ":" separator e.g: 12:30')
@@ -60,6 +55,12 @@ def from_yaml_block(yaml_block):
         instances.append(upm_instance)
     return instances
 
+os.makedirs('log', exist_ok=True)
+with open('logging_config.yml', 'r') as yaml_block:
+    logging.config.dictConfig(yaml.safe_load(yaml_block))
+
+logger = logging.getLogger(__name__)
+
 def email_pdfs():
     logger.info("Loading config file")
     try:
@@ -88,7 +89,7 @@ def email_pdfs():
 
         logger.info("Sending message")
         try:
-            instance.mailer.send_message()
+            pass#instance.mailer.send_message()
         except Exception:
             logger.exception("Failed to send email")
             return
