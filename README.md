@@ -1,4 +1,4 @@
-# url2pdf
+# urlpdfmailer
 A simple Dockerised Python script that emails a PDF version of a URL on a schedule. This is a classic sticky tape
 solution to a problem much better solved by a web developer but we don't all have that luxury!
 
@@ -28,3 +28,7 @@ ssl_email_settings:
   host: smtp.gmail.com
   port: 465
 ```
+
+## Running the service
+This repo is configured with Docker-compose so provided that the config file is valid, running `docker-compose up` 
+will start the service.

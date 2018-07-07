@@ -1,0 +1,11 @@
+version: '3'
+services:
+  urlpdfmailer:
+    build:
+      context: ./
+      dockerfile: python.dockerfile
+    restart: always
+    volumes:
+      - urlpdfmailer_logs:/usr/src/urlpdfmailer/log
+volumes:
+  urlpdfmailer_logs:
