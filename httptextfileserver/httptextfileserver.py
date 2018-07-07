@@ -6,7 +6,7 @@ class TextFileHandler(BaseHTTPRequestHandler):
         self.send_response(200)
         self.send_header('Content-type', 'text/html')
         self.end_headers()
-        self.wfile.write(self.server.http_get_response)
+        self.wfile.write(self.server.http_get_response())
 
 
 class HttpTextFileServer:
@@ -24,8 +24,11 @@ class HttpTextFileServer:
     def __init__(self, address, port, text_file):
         self.server = HTTPServer((address, port), TextFileHandler)
         self.text_file = text_file
-        with open(text_file, 'r') as text_file_content:
-            self.server.http_get_response = self.formatted_response(text_file_content).encode()
+        self.server.http_get_response = self.http_get_response
+
+    def  http_get_response(self):
+        with open(self.text_file, 'r') as text_file_content:
+            return self.formatted_response(text_file_content).encode()
 
     def run(self):
         self.server.serve_forever()
