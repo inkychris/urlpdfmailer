@@ -78,6 +78,7 @@ class Mailer:
 
     def send_message(self):
         self.logger.debug("Added message headers")
+        self._message['From'] = self.sender
         self._message['To'] = ','.join(self.to_recipients)
         self._message['CC'] = ','.join(self.cc_recipients)
         self._message['Subject'] = self.subject
